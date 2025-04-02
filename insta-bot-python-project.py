@@ -6,7 +6,8 @@ import json
 import os
 
 # ✅ JSON File ka Direct Path
-json_path = r"C:/Users/Vikas/OneDrive/Desktop/insta-bot/insta-bot-project-455515-2867fd12481e.json"
+json_path = r"C:\Users\Vikas\OneDrive\Desktop\insta-bot\json_key_file.json"
+
 
 # ✅ JSON File Check Karo
 if not os.path.exists(json_path):
