@@ -5,19 +5,21 @@ from playwright.sync_api import sync_playwright
 import json
 import os
 
-# ✅ Google Sheets API ka Scope
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+# ✅ JSON File ka Automatic Path
+json_path = os.path.join(os.getcwd(), "insta-bot-project-455515-2867fd12481e.json")
 
-# ✅ JSON File se Credentials Load Karo
-json_path = "C:/Users/Vikas/Downloads/insta-bot-project-455515-2867fd12481e.json"
+# ✅ Check if JSON File Exists
 if not os.path.exists(json_path):
     print(f"❌ Error: JSON file not found at {json_path}")
     exit(1)
 
+# ✅ Google Sheets API ka Scope
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+# ✅ Load Credentials from JSON File
 with open(json_path, "r") as file:
     service_account_info = json.load(file)
 
-# ✅ Credentials Load Karo
 creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
 client = gspread.authorize(creds)
 
@@ -39,17 +41,13 @@ def fetch_google_sheet_message():
         return None
 
     if 7 <= current_hour < 12:
-        message = today_data.get('Morning Reply', '')
+        message = today_data['Morning Reply']
     elif 12 <= current_hour < 17:
-        message = today_data.get('Afternoon Reply', '')
+        message = today_data['Afternoon Reply']
     elif 17 <= current_hour < 21:
-        message = today_data.get('Evening Reply', '')
+        message = today_data['Evening Reply']
     else:
-        message = today_data.get('Evening Reply 2', '')
-
-    if not message:
-        print("❌ No valid message found!")
-        return None
+        message = today_data['Evening Reply 2']
 
     print(f"✅ Message Fetched: {message}")
     return message
@@ -61,9 +59,6 @@ def login_and_send_message():
         print("🚫 No message to send at this time.")
         return
 
-    IG_USERNAME = os.getenv("IG_USERNAME", "vikash.panday002@gmail.com")
-    IG_PASSWORD = os.getenv("IG_PASSWORD", "vikash@8744")
-
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="chrome", headless=False, slow_mo=100)
         context = browser.new_context()
@@ -74,8 +69,8 @@ def login_and_send_message():
         page.wait_for_selector("input[name='username']", timeout=15000)
         page.wait_for_selector("input[name='password']", timeout=15000)
 
-        page.locator("input[name='username']").fill(IG_USERNAME)
-        page.locator("input[name='password']").fill(IG_PASSWORD)
+        page.locator("input[name='username']").fill("vikash.panday002@gmail.com")
+        page.locator("input[name='password']").fill("vikash@8744")
         page.locator("button[type='submit']").click()
 
         print("⏳ Waiting for login to complete...")
@@ -110,19 +105,30 @@ def login_and_send_message():
             print("✅ No 'Turn on Notifications' popup detected on Chat Page.")
 
         print("⌛ Waiting for Message Input Box...")
+        for attempt in range(3):
+            try:
+                message_box = page.locator("div[role='textbox']")
+                if message_box.is_visible():
+                    print("✅ Message Box Found!")
+                    break
+            except:
+                print(f"🔄 Attempt {attempt + 1}: Message Box not found, retrying...")
+                page.wait_for_timeout(2000)
+
         try:
-            message_box = page.wait_for_selector("div[role='textbox']", timeout=10000)
             message_box.click()
             page.wait_for_timeout(1000)
             message_box.fill("")
             message_box.type(message, delay=50)
             page.keyboard.press("Enter")
             print("✅ Message Sent!")
+            print("⏳ Waiting 5 seconds before closing the browser...")
             page.wait_for_timeout(5000)
-        except Exception as e:
-            print(f"❌ Error sending message: {e}")
+        except:
+            print("❌ Message Box Not Found! Maybe Instagram updated UI.")
 
         browser.close()
         print("🚪 Browser Closed Successfully!")
 
+# ✅ Run the Function
 login_and_send_message()
