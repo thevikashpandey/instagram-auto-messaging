@@ -9,7 +9,7 @@ import os
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # ✅ JSON File se Credentials Load Karo
-json_path = "insta-bot-project-455515-2867fd12481e.json"
+json_path = "C:/Users/Vikas/Downloads/insta-bot-project-455515-2867fd12481e.json"
 if not os.path.exists(json_path):
     print(f"❌ Error: JSON file not found at {json_path}")
     exit(1)
