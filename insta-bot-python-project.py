@@ -2,24 +2,24 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from playwright.sync_api import sync_playwright
-import json
-import os
 
-# ✅ JSON File ka Automatic Path
-json_path = os.path.join(os.getcwd(), "insta-bot-project-455515-2867fd12481e.json")
+# ✅ JSON File Content ko Directly Paste Karo
+service_account_info = {
+  "type": "service_account",
+  "project_id": "insta-bot-project-455515",
+  "private_key_id": "2867fd12481e93540551c3c08cc6a679520b9420",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCyg8sMNTgCimlk\nIPwuYvYPmQpFUYqRmDFNKJLTGClWlmP/ChEz9PFjTOAJpxQJmW5a/xl47vIFcDdA\n5kY4Ki0ExBPQUrI8xxbCKwFFFd6WftR1ONIWg8dCHiBeGgsZQCJufO7e5zr4ZM/o\nBW6AyIHhTsci1iDdMQP1L8VaIo1YFuS/+a/B/Z4SJrApbgmroCqHUiZPCnurjLSW\nd7l28f2ky6+lUP4XjNBI3d/fJhpcLG51hzwCzrn5UO8BqanJ4gFsgO1sv87pkcp1\nl9x7/PiMU0LnPE3EWaXa2xNd+JsjherfQkpiFd92fYbeW0Cjjv2A092EoVABHXug\nBMMa9Z9rAgMBAAECggEACz/m8dQAvZg/YAH8Img2HXGFhizHULmIkdY2unrRUBWW\nI6JcxytuctWLYNBYoOo8XBurXUWhltolgT+BuVRfFefNX9l2RgI92uqe392q80z2\n0pRMGQMg8Xe4jnWRsXurL89LtlxYCQNBXtvIxPDdzncKcZWQ6J+IIlFqXG3E/oIH\n2mv1gSnCcOJkX2odI/ypN/4J8OGDavg5cGcL5uJaevf7ea+J6mrgR0EDKGEevUlF\n9xXhFwfUkui9Ake6AYNfs/2U8VCgqCLVe2M4UwIa0veG7KkukxMbIrDDGeiaETpe\n269P/4nXTH2i/1YqXXNiIKABMSYybXZXtI2VKqg5gQKBgQDgjJC9lsi12Fim8jCb\nw4JjG4K+FcLbOLfQYcXDN4YbA77ddVPqv2ZYy51SuHnL/8IVJNekKEJMddtBpqrH\nA527JGFGrECAKmoe2ib87Wuv0N0kBlyBRU7oGYXqgyaOfTwdqUpgPL39CfHIIu3G\np1XxJT9fgcnNDe/Y97wAyanA4QKBgQDLhJ9fsIVjiXdtJfpTnl2sWt9Hj/gkklen\nywq0y53ijBIAE8jI1yvg20Qe+oWuiYpBfZKyc3i9rUfQIM7Ect9pKC73RwhMGJHQ\nKjZAvGkBArkSWH/kh90bXaqWpsVn5xkTX/vmvvQJNNMvHQtvGX7evGSmmh/QFLoF\np5WjbxZNywKBgQDKIz+Yq8f6issjXhoL3i/d78H+Q7Cpj6FI4PsaBT2fy/theGEW\njT4g6QqykIZz8cRRLF1C1Ur5cY7yxootpT+0W8eFy0I1Hflx1IgMX93041xvNZrI\ndA/YOEGpHm7zDiGzwdXGVGfjBbS1qVvK3JAtCI7H9xomkUk8U6bWPrOlgQKBgAcA\nrjctrLlLDpfr2Zws884tZkdhFcm0W13Dp7+mzezwouHrzFnUxYa8JLDoL9dclixA\ntN59CKeGIdVwe4zY4wUMQ+lwQUHVCpdeDHXXxckqHdIax3PGlP4PEAKVBG/ZzMwU\n3mcHJQB4F9gkKLOO7gWd99yfqv6O6AOvy39PIDZXAoGAVZb2nMbHxl5APWRpCJhU\n1Ywk7WNaB3wZB62BpxxFN934AZUWpua+7600OG52mivowpm75eYYrdAWaPLTvpHb\nf4jDgZnjXYVS7R7L1Em893rJp2P36zh0O509vfIIz5tZAJeuKkWS/fv6VuPKSRji\n7oPZ+Z3eQyC1ayGvCKuioTs=\n-----END PRIVATE KEY-----\n",
+  "client_email": "insta-bot-service@insta-bot-project-455515.iam.gserviceaccount.com",
+  "client_id": "100516398673289923716",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/insta-bot-service%40insta-bot-project-455515.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
 
-# ✅ Check if JSON File Exists
-if not os.path.exists(json_path):
-    print(f"❌ Error: JSON file not found at {json_path}")
-    exit(1)
-
-# ✅ Google Sheets API ka Scope
+# ✅ Google Sheets API Authentication
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-# ✅ Load Credentials from JSON File
-with open(json_path, "r") as file:
-    service_account_info = json.load(file)
-
 creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
 client = gspread.authorize(creds)
 
