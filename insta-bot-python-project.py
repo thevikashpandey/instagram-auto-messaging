@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # ✅ JSON Key File ka path
-KEY_FILE = "C:/Users/Vikas/Downloads/insta-bot-project-455515-2867fd12481e.json"
+KEY_FILE = "insta-bot-project-455515-2867fd12481e.json"
 
 # ✅ Google Sheet ID
 SHEET_ID = "11YkWvsAkEvB6FqFKIub_tcFZnpAMUMoInuvBGDvH89k"  # Google Sheet ka ID
@@ -138,3 +138,4 @@ def login_and_send_message():
 
 # Run the function
 login_and_send_message()
+# ==========================================================================================
