@@ -1,38 +1,23 @@
+import os
+import json
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from playwright.sync_api import sync_playwright
-import json
-import os
-import gdown
 
-# ✅ Google Drive JSON File ID (Agar Local File Na Mile to Drive se Lo)
-DRIVE_FILE_ID = "1pOSTW0xlijy_TADy56LoOD0-m5dN6EaG"
-LOCAL_JSON_PATH = r"C:\Users\Vikas\OneDrive\Desktop\insta-bot\instakeyfile.json"
+# ✅ JSON File Load from Railway Environment Variables
+json_creds = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+if not json_creds:
+    raise ValueError("❌ Google Service Account JSON not found in Environment Variables!")
 
-# ✅ JSON File Check & Fetch
-if os.path.exists(LOCAL_JSON_PATH):
-    json_path = LOCAL_JSON_PATH
-    print(f"✅ Using Local JSON File: {json_path}")
-else:
-    json_path = "service_account.json"
-    drive_url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
-    gdown.download(drive_url, json_path, quiet=False)
-    print(f"✅ Downloaded JSON from Google Drive: {json_path}")
+service_account_info = json.loads(json_creds)
 
-# ✅ JSON File Load Karo
-if not os.path.exists(json_path):
-    raise FileNotFoundError(f"\n❌ Error: JSON file not found at {json_path}\n")
-
-with open(json_path, "r") as file:
-    service_account_info = json.load(file)
-
-# ✅ Google Sheets API Credentials
+# ✅ Google Sheets API Setup
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
 client = gspread.authorize(creds)
 
-# ✅ Google Sheet ID
+# ✅ Google Sheet ID & Access
 SHEET_ID = "11YkWvsAkEvB6FqFKIub_tcFZnpAMUMoInuvBGDvH89k"
 sheet = client.open_by_key(SHEET_ID).sheet1
 
@@ -76,9 +61,14 @@ def login_and_send_message():
         page.wait_for_selector("input[name='username']", timeout=15000)
         page.wait_for_selector("input[name='password']", timeout=15000)
 
-        # ✅ Instagram Credentials
-        page.locator("input[name='username']").fill("vikash.panday002@gmail.com")
-        page.locator("input[name='password']").fill("vikash@8744")
+        # ✅ Instagram Credentials (Replace with Environment Variables)
+        insta_username = os.getenv("INSTA_USERNAME")
+        insta_password = os.getenv("INSTA_PASSWORD")
+        if not insta_username or not insta_password:
+            raise ValueError("❌ Instagram Credentials Missing in Environment Variables!")
+
+        page.locator("input[name='username']").fill(insta_username)
+        page.locator("input[name='password']").fill(insta_password)
         page.locator("button[type='submit']").click()
         page.wait_for_timeout(5000)
 
