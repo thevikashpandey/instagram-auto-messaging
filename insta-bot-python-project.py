@@ -5,12 +5,17 @@ from google.oauth2.service_account import Credentials
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
-# ✅ JSON File Load from Railway Environment Variables
+
 json_creds = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+
 if not json_creds:
     raise ValueError("❌ Google Service Account JSON not found in Environment Variables!")
 
-service_account_info = json.loads(json_creds)
+try:
+    service_account_info = json.loads(json_creds)
+    print("✅ JSON Loaded Successfully:", service_account_info.keys())  # Check if data is correct
+except json.JSONDecodeError:
+    raise ValueError("❌ Invalid JSON Format in Environment Variable!")
 
 # ✅ Google Sheets API Setup
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
