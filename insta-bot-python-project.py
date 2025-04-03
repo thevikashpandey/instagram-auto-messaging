@@ -4,16 +4,26 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 import json
 import os
+import gdown
 
-# ✅ JSON File ka Direct Path
-json_path = r"C:\Users\Vikas\OneDrive\Desktop\insta-bot\json_key_file.json"
+# ✅ Google Drive JSON File ID (Agar Local File Na Mile to Drive se Lo)
+DRIVE_FILE_ID = "1p69bUk0WF2tqi53ZqttRsVlEfKCKLkph"
+LOCAL_JSON_PATH = r"C:\Users\Vikas\OneDrive\Desktop\insta-bot\json_key_file.json"
 
+# ✅ JSON File Check & Fetch
+if os.path.exists(LOCAL_JSON_PATH):
+    json_path = LOCAL_JSON_PATH
+    print(f"✅ Using Local JSON File: {json_path}")
+else:
+    json_path = "service_account.json"
+    drive_url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
+    gdown.download(drive_url, json_path, quiet=False)
+    print(f"✅ Downloaded JSON from Google Drive: {json_path}")
 
-# ✅ JSON File Check Karo
+# ✅ JSON File Load Karo
 if not os.path.exists(json_path):
     raise FileNotFoundError(f"\n❌ Error: JSON file not found at {json_path}\n")
 
-# ✅ JSON File Load Karo
 with open(json_path, "r") as file:
     service_account_info = json.load(file)
 
@@ -24,21 +34,20 @@ client = gspread.authorize(creds)
 
 # ✅ Google Sheet ID
 SHEET_ID = "11YkWvsAkEvB6FqFKIub_tcFZnpAMUMoInuvBGDvH89k"
-sheet = client.open_by_key(SHEET_ID).sheet1  # First sheet select
+sheet = client.open_by_key(SHEET_ID).sheet1
 
-# ✅ Google Sheet se Message Fetch Karne Ka Function
 def fetch_google_sheet_message():
-    today_date = datetime.today().strftime("%d-%m-%Y")  # Format: DD-MM-YYYY
-    current_hour = int(datetime.now().strftime("%H"))  # Current Hour
-
+    today_date = datetime.today().strftime("%d-%m-%Y")
+    current_hour = int(datetime.now().strftime("%H"))
+    
     print(f"🔍 Searching data for Date: {today_date}")
     data = sheet.get_all_records()
     today_data = next((row for row in data if row['Date'] == today_date), None)
-
+    
     if not today_data:
         print("❌ No data found for today’s date!")
         return None
-
+    
     if 7 <= current_hour < 12:
         message = today_data['Morning Reply']
     elif 12 <= current_hour < 17:
@@ -47,17 +56,16 @@ def fetch_google_sheet_message():
         message = today_data['Evening Reply']
     else:
         message = today_data['Evening Reply 2']
-
+    
     print(f"✅ Message Fetched: {message}")
     return message
 
-# ✅ Instagram Login & Message Send Function
 def login_and_send_message():
     message = fetch_google_sheet_message()
     if not message:
         print("🚫 No message to send at this time.")
         return
-
+    
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False, slow_mo=100)
         context = browser.new_context()
@@ -68,13 +76,13 @@ def login_and_send_message():
         page.wait_for_selector("input[name='username']", timeout=15000)
         page.wait_for_selector("input[name='password']", timeout=15000)
 
-        # ✅ Instagram Credentials (Change Karo Agar Needed)
+        # ✅ Instagram Credentials
         page.locator("input[name='username']").fill("vikash.panday002@gmail.com")
         page.locator("input[name='password']").fill("vikash@8744")
         page.locator("button[type='submit']").click()
         page.wait_for_timeout(5000)
 
-        # ✅ Popup Handling
+        # ✅ Handle Popups
         for _ in range(2):  
             try:
                 page.wait_for_selector("text=Not Now", timeout=5000)
@@ -86,7 +94,6 @@ def login_and_send_message():
         page.goto("https://www.instagram.com/direct/t/17847260585702538/", timeout=20000)
         page.wait_for_timeout(5000)
 
-        # ✅ Message Box Handling
         try:
             message_box = page.locator("div[role='textbox']")
             message_box.click()
@@ -100,5 +107,5 @@ def login_and_send_message():
         browser.close()
         print("🚪 Browser Closed Successfully!")
 
-# ✅ Script Execute Karo
+# ✅ Execute Script
 login_and_send_message()
